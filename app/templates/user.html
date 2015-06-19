@@ -1,0 +1,35 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="row-fluid">
+  <div class="span6 offset2">
+   <table>
+       <tr valign="top">
+           <td><img src="{{ user.avatar(128) }}"></td>
+           <td>
+             <h1>{{user.nickname}}</h1>
+           {% if user.about_me %}<p>{{ user.about_me }}</p>{% endif %}
+           {% if user.last_seen %}<p><i>Last seen on: {{ user.last_seen }}</i></p>{% endif %}
+	   {% if user.id == g.user.id %}<p><a href="{{ url_for('edit') }}">Edit</a></p>{% endif %}
+           </td>
+       </tr>
+   </table>
+   <hr>
+ </div> 
+</div>
+
+<div class="row-fluid">
+  <div class="span8 offset2">
+   {% for post in posts.items %}
+       {% include 'post.html' %}
+   {% endfor %}
+ 
+   {% if posts.has_prev %}<a href="{{ url_for('user', nickname=user.nickname, page=posts.prev_num) }}">&lt;&lt; Newer posts</a>{% else %}&lt;&lt; Newer posts{% endif %} | 
+   {% if posts.has_next %}<a href="{{ url_for('user', nickname=user.nickname, page=posts.next_num) }}">Older posts &gt;&gt;</a>{% else %}Older posts &gt;&gt;{% endif %}
+
+ </div> 
+</div>
+
+{% endblock %}
