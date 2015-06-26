@@ -1,5 +1,5 @@
 from flask.ext.wtf import Form
-from wtforms import StringField, BooleanField, TextAreaField
+from wtforms import StringField, BooleanField, TextAreaField, IntegerField
 from wtforms.validators import DataRequired, Length
 from app.models import User
 
@@ -26,6 +26,8 @@ class EditForm(Form):
             return False
         return True
 
-class PostForm(Form):
-    post = StringField('post', validators=[DataRequired()])
+class PostnCommentForm(Form):
+    post = TextAreaField('post', validators=[DataRequired()])
     title = StringField('title', validators=[DataRequired()])
+    p_id= IntegerField('p_id')
+    

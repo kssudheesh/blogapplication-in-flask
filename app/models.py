@@ -50,6 +50,17 @@ class Post(db.Model):
     body = db.Column(db.String(2000))
     timestamp = db.Column(db.DateTime)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-
+    comments = db.relationship('Comment', backref='parent_post', lazy='dynamic')
+    
     def __repr__(self):
         return '<Post %r>' % (self.body)
+
+class Comment(db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+    name = db.Column(db.String(40))
+    body = db.Column(db.String(140))
+    timestamp = db.Column(db.DateTime)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
+
+    def __repr__(self):
+        return '<Comment %r>' % (self.body)

@@ -4,8 +4,8 @@ from app import app, db, lm, oid
 from .forms import LoginForm
 from .models import User
 from datetime import datetime
-from forms import LoginForm, EditForm, PostForm
-from models import User, Post
+from forms import LoginForm, EditForm, PostnCommentForm
+from models import User, Post, Comment
 from config import POSTS_PER_PAGE
 
 @app.route('/', methods=['GET', 'POST'])
@@ -13,12 +13,22 @@ from config import POSTS_PER_PAGE
 @app.route('/index/<int:page>', methods=['GET', 'POST'])
 @login_required
 def index(page=1):
-    form = PostForm()
+    form = PostnCommentForm()
     if form.validate_on_submit():
+      if request.form['btn'] == 'Post!':
         post = Post(title=form.title.data, body=form.post.data, timestamp=datetime.utcnow(), author=g.user)
         db.session.add(post)
         db.session.commit()
         flash('Your post is now live!')
+        return redirect(url_for('index'))
+      else:    
+        comment = Comment(name=form.title.data, body=form.post.data, timestamp=datetime.utcnow(), post_id=form.p_id.data)
+        db.session.add(comment)
+	#or
+	#post = Post.query.get_or_404(form.p_id.data) (retrieving object 'post' which containg respective post.id)
+        #comment = Comment(name=form.title.data, body=form.post.data, timestamp=datetime.utcnow(), parent_post=post)
+        db.session.commit()
+        flash('Your comment is now live!')
         return redirect(url_for('index'))
     posts = g.user.blog_posts().paginate(page, POSTS_PER_PAGE, False)
     return render_template('index.html',
@@ -78,10 +88,17 @@ def before_request():
         db.session.add(g.user)
         db.session.commit()
 
-@app.route('/user/<nickname>')
-@app.route('/user/<nickname>/<int:page>')
+@app.route('/user/<nickname>', methods=['GET', 'POST'])
+@app.route('/user/<nickname>/<int:page>', methods=['GET', 'POST'])
 @login_required
 def user(nickname, page=1):
+    form = PostnCommentForm()
+    if form.validate_on_submit():
+        comment = Comment(name=form.title.data, body=form.post.data, timestamp=datetime.utcnow(), post_id=form.p_id.data)
+        db.session.add(comment)
+        db.session.commit()
+        flash('Your comment is now live!')
+        return redirect(url_for('index'))
     user = User.query.filter_by(nickname=nickname).first()
     if user == None:
         flash('User %s not found.' % nickname)
@@ -90,6 +107,7 @@ def user(nickname, page=1):
     
     return render_template('user.html',
                            user=user,
+			   form=form,
                            posts=posts)
 
 @app.route('/edit', methods=['GET', 'POST'])
